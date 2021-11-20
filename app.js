@@ -38,19 +38,31 @@ const item3 = new Item ({
 
 const defaultItems = [item1, item2, item3];
 
-Item.insertMany(defaultItems, function(err) {
-  if(err) {
-    console.log(err);
-  } else {
-    console.log("Sucessfully saved defaultItems to DB.");
-  }
-});
+//ROUTES
 
 app.get("/", function(req, res) {
-
-  res.render("list", {listTitle: "Today", newListItems: items});
-
+  Item.find({}, function(err, foundItems) {
+    if (err) {
+      console.log(err);
+    } else {
+      //if databse is empty show default tasks
+      if (foundItems.length === 0) {
+        Item.insertMany(defaultItems, function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Successfully saved default items to DB.");
+            res.redirect('/'); //checks if there are items in the collection and if there are items, it will pass to the next block of code
+          }
+        });
+      } else {
+        //log items that are at the database
+        res.render('list', {listTitle: 'Today', newListItems: foundItems});
+      }
+    }
+  });
 });
+  
 
 app.post("/", function(req, res){
 
